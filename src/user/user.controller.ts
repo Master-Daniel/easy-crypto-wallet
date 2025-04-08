@@ -21,7 +21,7 @@ export class UserController {
   async create(@Body() createUserDto: CreateUserDto): Promise<{
     message: string;
     status: number;
-    user: ReturnType<User['toJSON']>;
+    data: ReturnType<User['toJSON']>;
   }> {
     return await this.userService.create(createUserDto);
   }
