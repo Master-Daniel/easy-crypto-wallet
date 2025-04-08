@@ -243,47 +243,23 @@ export class UserService {
     return user;
   }
 
-  async remove(id: string): Promise<{
-    status: number;
-    message: string;
-  }> {
-    const user = await this.userRepo.findOne(id);
-    if (!user) {
-      throw new HttpException(
-        { message: 'User not found' },
-        HttpStatus.NOT_FOUND,
-      );
+  async remove(id: string): Promise<{ status: number; message: string }> {
+    try {
+      const user = await this.userRepo.findOne(id);
+      if (!user) {
+        throw new HttpException(
+          { message: 'User not found' },
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      await this.em.removeAndFlush(user);
+      return {
+        status: HttpStatus.OK,
+        message: 'User deleted successfully',
+      };
+    } catch (error) {
+      this.logger.error(`Error removing user: ${error.message}`, error.stack);
+      throw new InternalServerErrorException(error.message);
     }
-    await this.em.removeAndFlush(user);
-    return {
-      status: HttpStatus.OK,
-      message: 'User deleted successfully',
-    };
-  }
-
-  private generateJWT(user: User) {
-    const today = new Date();
-    const exp = new Date(today);
-    exp.setDate(today.getDate() + 60);
-    const SECRET = this.configService.get<string>('SECRET');
-    if (!SECRET) {
-      throw new Error('JWT secret is not defined in the configuration.');
-    }
-
-    return jwt.sign(
-      {
-        email: user.email,
-        exp: exp.getTime() / 1000,
-        id: user.id,
-      },
-      SECRET,
-    );
-  }
-
-  private buildUserRO(user: User, token = true) {
-    return {
-      ...user.toJSON(), // 🔥 Use the toJSON() method for correct structure
-      token: token ? this.generateJWT(user) : '',
-    };
   }
 }
