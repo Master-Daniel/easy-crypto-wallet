@@ -49,7 +49,6 @@ export class User {
   @Property({ onCreate: () => new Date(), onUpdate: () => new Date() })
   updatedAt?: Date;
 
-  // ✅ Custom JSON serialization to remove nested user object in wallet
   toJSON() {
     return {
       id: this.id,
