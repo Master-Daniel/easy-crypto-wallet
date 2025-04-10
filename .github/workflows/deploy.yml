@@ -103,8 +103,8 @@ jobs:
             ssh -i "$SSH_PRIVATE_KEY_PATH" -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.SERVER_IP }} << 'EOF'
               echo "Restarting or starting PM2 process on the server..."
               cd /home/${{ secrets.USER }}/easy-crypto-wallet || exit 1
-              /usr/local/apps/nodejs22/bin/pm2 restart elite-coin-market-cap-backend || \
-              /usr/local/apps/nodejs22/bin/pm2 start dist/main.js --name "elite-coin-market-cap-backend" --watch
+              /usr/local/apps/nodejs22/bin/pm2 restart easy-crypto-wallet-backend || \
+              /usr/local/apps/nodejs22/bin/pm2 start dist/main.js --name "easy-crypto-wallet-backend" --watch
               echo "Deployment complete."
               EOF
 
