@@ -48,6 +48,7 @@
     "cache-manager": "^6.4.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
+    "ejs": "^3.1.10",
     "jsonwebtoken": "^9.0.2",
     "node-fetch": "^3.3.2",
     "nodemailer": "^6.10.0",
