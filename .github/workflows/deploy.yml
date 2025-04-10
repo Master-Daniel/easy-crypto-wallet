@@ -26,7 +26,7 @@ jobs:
         run: npm run build
 
       - name: Archive build files
-        run: tar -czf dist.tar.gz dist package.json
+        run: tar -czf dist.tar.gz dist src package.json
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
