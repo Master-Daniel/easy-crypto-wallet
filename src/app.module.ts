@@ -12,6 +12,7 @@ import { CoinMarketModule } from './coin-market/coin-market.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { AdminModule } from './admin/admin.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { NotifyModule } from './notify.gateway/notify.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     ScheduleModule.forRoot(),
     CacheModule.register({
       ttl: 60,
+      isGlobal: true,
       max: 100,
     }),
     ThrottlerModule.forRoot({
@@ -35,6 +37,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     AuthModule,
     CoinMarketModule,
     AdminModule,
+    NotifyModule,
   ],
   controllers: [CoinMarketController, AdminSettingsController],
   providers: [],
