@@ -106,7 +106,7 @@ jobs:
               /usr/local/apps/nodejs22/bin/pm2 restart easy-crypto-wallet-backend || \
               /usr/local/apps/nodejs22/bin/pm2 start dist/main.js --name "easy-crypto-wallet-backend" --watch
               echo "Deployment complete."
-              EOF
+            EOF
 
       - name: Delete all artifacts
         uses: actions/github-script@v6
