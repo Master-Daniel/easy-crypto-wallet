@@ -19,6 +19,9 @@ import { generateOtp } from 'src/utils/generate-otp.util';
 import { MailService } from 'src/utils/send-mail.util';
 import { OtpDto } from './dto/otp-user.dto';
 import { generateJWT } from '../utils/generateJWT';
+import { LoginUserDto } from './dto/login-user.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ResendOtpDto } from './dto/resend-otp.dto';
 
 @Injectable()
 export class UserService {
@@ -130,6 +133,46 @@ export class UserService {
     };
   }
 
+  async login(loginUserDto: LoginUserDto): Promise<{
+    message: string;
+    status: number;
+    token: string;
+    data: ReturnType<User['toJSON']>;
+  }> {
+    const { email, password } = loginUserDto;
+
+    const user = await this.userRepo.findOne(
+      { email },
+      { populate: ['wallet'] },
+    );
+
+    if (!user) {
+      throw new HttpException(
+        { message: 'User not found', status: HttpStatus.NOT_FOUND },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const isPasswordValid = await HashUtil.comparePassword(
+      password,
+      user.password || '',
+    );
+
+    if (!isPasswordValid) {
+      throw new HttpException(
+        { message: 'Invalid credentials', status: HttpStatus.UNAUTHORIZED },
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    return {
+      status: HttpStatus.OK,
+      message: 'Login successful',
+      data: user.toJSON(),
+      token: generateJWT({ id: user.id, email: email }, this.configService),
+    };
+  }
+
   async verifyOtp(
     otpDto: OtpDto,
   ): Promise<{ message: string; status: number; token: string }> {
@@ -159,6 +202,101 @@ export class UserService {
       message: 'OTP verification successful',
       status: HttpStatus.OK,
       token: generateJWT({ id: user.id, email: email }, this.configService),
+    };
+  }
+
+  async resendOtp(resendOtpDto: ResendOtpDto): Promise<{
+    message: string;
+    status: number;
+  }> {
+    const { email } = resendOtpDto;
+    const user = await this.userRepo.findOne({ email });
+    if (!user) {
+      throw new HttpException(
+        { message: 'User not found' },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const otp = generateOtp(6);
+    user.email_otp = otp;
+    this.em.persist(user);
+    await this.em.flush();
+
+    await this.mailService.sendMail(
+      email,
+      email,
+      otp,
+      'welcome',
+      'Email Verification',
+    );
+
+    return {
+      message: 'OTP resent successfully',
+      status: HttpStatus.OK,
+    };
+  }
+
+  async forgotPassword(resendOtpDto: ResendOtpDto): Promise<{
+    message: string;
+    status: number;
+  }> {
+    const { email } = resendOtpDto;
+    const user = await this.userRepo.findOne({ email });
+    if (!user) {
+      throw new HttpException(
+        { message: 'User not found' },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    const otp = generateOtp(6);
+    user.email_otp = otp;
+    this.em.persist(user);
+    await this.em.flush();
+    await this.mailService.sendMail(
+      email,
+      email,
+      otp,
+      'password-request',
+      'Password Reset',
+    );
+    return {
+      message: 'Password reset OTP sent successfully',
+      status: HttpStatus.OK,
+    };
+  }
+
+  async resetPassword(
+    resetPasswordDto: ResetPasswordDto,
+  ): Promise<{ message: string; status: number }> {
+    const { newPassword, confirmNewPassword, otp } = resetPasswordDto;
+    const user = await this.userRepo.findOne({ email_otp: otp });
+    if (newPassword !== confirmNewPassword) {
+      throw new HttpException(
+        { message: 'Passwords do not match' },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (newPassword.length < 8) {
+      throw new HttpException(
+        { message: 'Password must be at least 8 characters long' },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (!user) {
+      throw new HttpException(
+        { message: 'User not found' },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    user.password = await HashUtil.hashPassword(newPassword);
+    user.email_verified = true;
+    user.email_otp = '000000';
+    this.em.persist(user);
+    await this.em.flush();
+    return {
+      message: 'Password reset successful',
+      status: HttpStatus.OK,
     };
   }
 
