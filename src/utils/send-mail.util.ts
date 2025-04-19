@@ -29,9 +29,9 @@ export class MailService {
   }
 
   async sendMail(
-    to: string,
+    to: string | string[], // accept multiple recipients
     name: string,
-    message: string,
+    message: string | string[],
     type: string,
     subject: string,
   ): Promise<boolean> {
@@ -49,7 +49,10 @@ export class MailService {
         name,
         app_url: this.configService.get<string>('FRONT_END_URL'),
         contact_email: this.configService.get<string>('CONTACT_EMAIL'),
-        message,
+        user_id: message[0],
+        email: message[1],
+        subscription: message[2],
+        message: Array.isArray(message) ? message.join('<br>') : message,
       });
 
       const mailOptions: nodemailer.SendMailOptions = {
