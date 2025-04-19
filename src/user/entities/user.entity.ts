@@ -10,6 +10,9 @@ export class User {
   @Property({ unique: true })
   user_id?: string;
 
+  @Property()
+  fullname: string;
+
   @Property({ unique: true })
   email!: string;
 
@@ -54,6 +57,7 @@ export class User {
       id: this.id,
       email: this.email,
       user_id: this.user_id,
+      fullname: this.fullname,
       email_verified: this.email_verified,
       phone: this.phone,
       provider: this.provider,
