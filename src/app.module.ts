@@ -13,6 +13,10 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { AdminModule } from './admin/admin.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { NotifyModule } from './notify.gateway/notify.module';
+import { TierController } from './tier/tier.controller';
+import { TierModule } from './tier/tier.module';
+import { DepositRequestController } from './deposit/deposit-request.controller';
+import { DepositRequestModule } from './deposit/deposit-request.module';
 
 @Module({
   imports: [
@@ -38,8 +42,15 @@ import { NotifyModule } from './notify.gateway/notify.module';
     CoinMarketModule,
     AdminModule,
     NotifyModule,
+    TierModule,
+    DepositRequestModule,
   ],
-  controllers: [CoinMarketController, AdminSettingsController],
+  controllers: [
+    CoinMarketController,
+    AdminSettingsController,
+    TierController,
+    DepositRequestController,
+  ],
   providers: [],
 })
 export class AppModule {}
