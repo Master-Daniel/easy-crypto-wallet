@@ -20,6 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "mikro-orm": "ts-node -r tsconfig-paths/register node_modules/@mikro-orm/cli/cli.js",
     "schema:drop": "ts-node -r tsconfig-paths/register node_modules/@mikro-orm/cli/cli.js schema:drop --config=src/mikro-orm.config.ts --run",
+    "migration:fresh": "ts-node -r tsconfig-paths/register node_modules/@mikro-orm/cli/cli.js migration:fresh --config=src/mikro-orm.config.ts",
     "migration:create": "ts-node node_modules/@mikro-orm/cli/cli.js migration:create --config=src/mikro-orm.config.ts",
     "migration:up": "ts-node -r tsconfig-paths/register node_modules/@mikro-orm/cli/cli.js migration:up --config=src/mikro-orm.config.ts",
     "migration:down": "ts-node -r tsconfig-paths/register node_modules/@mikro-orm/cli/cli.js migration:down --config=src/mikro-orm.config.ts",
