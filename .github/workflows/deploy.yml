@@ -92,7 +92,7 @@ jobs:
           tar -xzf dist.tar.gz
 
           echo "Installing dependencies..."
-          npm install --omit=dev || exit 1
+          npm install --omit=dev && npm run migration:create && npm run schema:drop && npm run migration:fresh && npm run seeder || exit 1
           EOF
 
           # Clean up SSH key after use
