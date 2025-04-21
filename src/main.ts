@@ -22,7 +22,11 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:5000'],
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:5000',
+      'http://easy-crypto-wallet.vercel.app',
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type, Authorization',
     credentials: true,
