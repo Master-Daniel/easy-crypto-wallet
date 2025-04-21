@@ -25,7 +25,7 @@ async function bootstrap() {
     origin: [
       'http://localhost:3000',
       'http://localhost:5000',
-      'http://easy-crypto-wallet.vercel.app',
+      'https://easy-crypto-wallet.vercel.app',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type, Authorization',
