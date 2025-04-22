@@ -21,4 +21,15 @@ export class Wallet {
 
   @Property({ onCreate: () => new Date(), onUpdate: () => new Date() })
   updatedAt!: Date;
+
+  toJSON() {
+    return {
+      id: this.id,
+      exchange: this.exchange,
+      trade: this.trade,
+      user: this.user?.toJSON(),
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
+  }
 }
