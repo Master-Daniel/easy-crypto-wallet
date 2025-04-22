@@ -17,6 +17,7 @@ import { TierController } from './tier/tier.controller';
 import { TierModule } from './tier/tier.module';
 import { DepositRequestController } from './deposit/deposit-request.controller';
 import { DepositRequestModule } from './deposit/deposit-request.module';
+import { TransactionModule } from './transaction/transaction.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { DepositRequestModule } from './deposit/deposit-request.module';
     NotifyModule,
     TierModule,
     DepositRequestModule,
+    TransactionModule,
   ],
   controllers: [
     CoinMarketController,
