@@ -12,11 +12,11 @@ import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ConfigService } from '@nestjs/config';
-import { HashUtil } from 'src/utils/hash.util';
-import { generateRandomString } from 'src/utils/generate-userid.util';
-import { Wallet } from 'src/wallet/entities/wallet.entity';
-import { generateOtp } from 'src/utils/generate-otp.util';
-import { MailService } from 'src/utils/send-mail.util';
+import { HashUtil } from '../utils/hash.util';
+import { generateRandomString } from '../utils/generate-userid.util';
+import { Wallet } from '../wallet/entities/wallet.entity';
+import { generateOtp } from '../utils/generate-otp.util';
+import { MailService } from '../utils/send-mail.util';
 import { OtpDto } from './dto/otp-user.dto';
 import { generateJWT } from '../utils/generateJWT';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -143,13 +143,20 @@ export class UserService {
 
     const user = await this.userRepo.findOne(
       { email },
-      { populate: ['wallet'] },
+      { populate: ['wallet', 'kyc_status'] },
     );
 
     if (!user) {
       throw new HttpException(
         { message: 'User not found', status: HttpStatus.NOT_FOUND },
         HttpStatus.NOT_FOUND,
+      );
+    }
+
+    if (!user.email_verified) {
+      throw new HttpException(
+        { message: 'Email not verified', status: HttpStatus.BAD_REQUEST },
+        HttpStatus.BAD_REQUEST,
       );
     }
 
