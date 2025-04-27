@@ -47,7 +47,7 @@ export class MailService {
 
       const htmlContent = ejs.render(template, {
         name,
-        app_url: this.configService.get<string>('FRONT_END_URL'),
+        app_url: this.configService.get<string>('APP_URL'),
         contact_email: this.configService.get<string>('CONTACT_EMAIL'),
         user_id: message[0],
         email: message[1],
