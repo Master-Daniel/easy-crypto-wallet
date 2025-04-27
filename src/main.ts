@@ -3,12 +3,25 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HttpExceptionFilter } from './common/http-exception.filter';
+import { join } from 'path';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // Explicitly casting HttpExceptionFilter
   app.useGlobalFilters(new HttpExceptionFilter());
+
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+    prefix: '/public/',
+  });
+
+  app.useStaticAssets(
+    join(__dirname, '..', 'dist', 'email', 'templates', 'images'),
+    {
+      prefix: '/public/',
+    },
+  );
 
   // Explicitly typing ValidationPipe error handling
   app.useGlobalPipes(
