@@ -18,6 +18,10 @@ import { TierModule } from './tier/tier.module';
 import { DepositRequestController } from './deposit/deposit-request.controller';
 import { DepositRequestModule } from './deposit/deposit-request.module';
 import { TransactionModule } from './transaction/transaction.module';
+import { KycController } from './kyc/kyc.controller';
+import { KycModule } from './kyc/kyc.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -28,6 +32,11 @@ import { TransactionModule } from './transaction/transaction.module';
       ttl: 60,
       isGlobal: true,
       max: 100,
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/public',
+      exclude: ['/api*'],
     }),
     ThrottlerModule.forRoot({
       throttlers: [
@@ -46,12 +55,14 @@ import { TransactionModule } from './transaction/transaction.module';
     TierModule,
     DepositRequestModule,
     TransactionModule,
+    KycModule,
   ],
   controllers: [
     CoinMarketController,
     AdminSettingsController,
     TierController,
     DepositRequestController,
+    KycController,
   ],
   providers: [],
 })
