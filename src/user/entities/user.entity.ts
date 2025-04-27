@@ -1,6 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import { Entity, PrimaryKey, Property, OneToOne } from '@mikro-orm/core';
 import { Wallet } from '../../wallet/entities/wallet.entity';
+import { KYC } from '../../kyc/entities/kyc-entity';
 
 @Entity()
 export class User {
@@ -46,6 +47,12 @@ export class User {
   })
   wallet?: Wallet;
 
+  @OneToOne(() => KYC, (kyc) => kyc.user, {
+    nullable: true,
+    mappedBy: 'user',
+  })
+  kyc_status?: KYC;
+
   @Property({ onCreate: () => new Date() })
   createdAt?: Date;
 
@@ -59,6 +66,7 @@ export class User {
       user_id: this.user_id,
       fullname: this.fullname,
       email_verified: this.email_verified,
+      kyc_status: this.kyc_status,
       phone: this.phone,
       provider: this.provider,
       providerId: this.providerId,
