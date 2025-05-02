@@ -1,4 +1,4 @@
-// src/kyc/kyc.module.ts
+// ../kyc/kyc.module.ts
 import {
   MiddlewareConsumer,
   Module,
@@ -12,13 +12,16 @@ import { User } from '../user/entities/user.entity';
 import { KYC } from './entities/kyc-entity';
 import { FileUploadService } from './upload-file.service';
 import { MailService } from '../utils/send-mail.util';
-import { AuthMiddleware } from 'src/middleware/auth.middleware';
-import { UserModule } from 'src/user/user.module';
+import { AuthMiddleware } from '../middleware/auth.middleware';
+import { UserModule } from '../user/user.module';
+import { AdminAuthMiddleware } from '../middleware/admin-auth';
+import { Admin } from '../admin/entities/admin.entity';
+import { AdminService } from '../admin/admin.service';
 
 @Module({
-  imports: [MikroOrmModule.forFeature([KYC, User]), UserModule],
+  imports: [MikroOrmModule.forFeature([KYC, User, Admin]), UserModule],
   controllers: [KycController],
-  providers: [KycService, FileUploadService, MailService],
+  providers: [KycService, FileUploadService, MailService, AdminService],
   exports: [KycService],
 })
 export class KycModule implements NestModule {
@@ -26,5 +29,12 @@ export class KycModule implements NestModule {
     consumer
       .apply(AuthMiddleware)
       .forRoutes({ path: 'kyc/submit', method: RequestMethod.POST });
+
+    consumer
+      .apply(AdminAuthMiddleware)
+      .forRoutes(
+        { path: '/', method: RequestMethod.GET },
+        { path: 'kyc/update/:id', method: RequestMethod.PATCH },
+      );
   }
 }
