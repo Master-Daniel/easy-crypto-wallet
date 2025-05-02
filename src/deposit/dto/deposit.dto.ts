@@ -9,4 +9,7 @@ export class DepositRequestDto {
 
   @IsString()
   subscription_plan: string;
+
+  @IsString()
+  amount: number;
 }
