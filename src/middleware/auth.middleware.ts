@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   HttpException,
   HttpStatus,
@@ -30,31 +28,60 @@ export class AuthMiddleware implements NestMiddleware {
 
     if (!SECRET) {
       throw new HttpException(
-        'Server configuration error: SECRET is not defined',
+        'Server configuration error',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
 
-    const authHeaders = req.headers.authorization;
-    if (authHeaders && authHeaders.split(' ')[1]) {
-      const token = authHeaders.split(' ')[1];
-      let decoded: any;
-      try {
-        decoded = jwt.verify(token, SECRET);
-      } catch (err) {
-        console.log(err);
-        throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
-      }
-      const user = await this.userService.findOne(decoded.id);
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      throw new HttpException(
+        'Authorization header missing',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
 
+    const [bearer, token] = authHeader.split(' ');
+    if (bearer !== 'Bearer' || !token) {
+      throw new HttpException(
+        'Invalid authorization header format',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    try {
+      // Verify token and check expiry
+      const decoded = jwt.verify(token, SECRET, {
+        ignoreExpiration: false,
+      }) as {
+        id: string;
+        exp: number;
+      };
+
+      // Additional manual expiry check (redundant but explicit)
+      const now = Math.floor(Date.now() / 1000);
+      if (decoded.exp < now) {
+        throw new HttpException('Token has expired', HttpStatus.UNAUTHORIZED);
+      }
+
+      const user = await this.userService.findOne(decoded.id);
       if (!user) {
-        throw new HttpException('User not found.', HttpStatus.UNAUTHORIZED);
+        throw new HttpException('User not found', HttpStatus.UNAUTHORIZED);
       }
 
       req.user = user;
       next();
-    } else {
-      throw new HttpException('Unauthorized.', HttpStatus.UNAUTHORIZED);
+    } catch (error) {
+      if (error instanceof jwt.TokenExpiredError) {
+        throw new HttpException('Token has expired', HttpStatus.UNAUTHORIZED);
+      }
+      if (error instanceof jwt.JsonWebTokenError) {
+        throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
+      }
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new HttpException('Authentication failed', HttpStatus.UNAUTHORIZED);
     }
   }
 }
