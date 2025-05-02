@@ -9,7 +9,7 @@ import { Tier } from './entity/tier.entity';
 import { TierController } from './tier.controller';
 import { TierService } from './tier.service';
 import { AuthMiddleware } from '../middleware/auth.middleware';
-import { UserModule } from 'src/user/user.module';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [MikroOrmModule.forFeature([Tier]), UserModule],
