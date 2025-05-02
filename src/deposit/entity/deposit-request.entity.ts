@@ -15,6 +15,9 @@ export class DepositRequest {
   @Property()
   subscription_plan: string;
 
+  @Property()
+  amount: number;
+
   @Property({ default: false })
   status?: boolean = false;
 
