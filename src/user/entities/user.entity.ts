@@ -1,7 +1,17 @@
 import { v4 as uuid } from 'uuid';
-import { Entity, PrimaryKey, Property, OneToOne } from '@mikro-orm/core';
+import {
+  Entity,
+  PrimaryKey,
+  Property,
+  OneToOne,
+  OneToMany,
+  Collection,
+  ManyToOne,
+} from '@mikro-orm/core';
 import { Wallet } from '../../wallet/entities/wallet.entity';
 import { KYC } from '../../kyc/entities/kyc-entity';
+import { TradedSignal } from '../../traded-signals/entities/traded-signals.entity';
+import { Tier } from '../../tier/entity/tier.entity';
 
 @Entity()
 export class User {
@@ -38,6 +48,12 @@ export class User {
   @Property({ nullable: true })
   avatarUrl?: string;
 
+  @ManyToOne(() => Tier, {
+    nullable: true,
+    eager: true,
+  })
+  tier?: Tier;
+
   @Property({ nullable: true })
   referralId?: string;
 
@@ -52,6 +68,9 @@ export class User {
     mappedBy: 'user',
   })
   kyc_status?: KYC;
+
+  @OneToMany(() => TradedSignal, (signal) => signal.user)
+  tradedSignals = new Collection<TradedSignal>(this);
 
   @Property({ onCreate: () => new Date() })
   createdAt?: Date;
@@ -71,6 +90,11 @@ export class User {
       provider: this.provider,
       providerId: this.providerId,
       avatarUrl: this.avatarUrl,
+      tier: this.tier
+        ? {
+            type: this.tier.type,
+          }
+        : null,
       referralId: this.referralId,
       wallet: this.wallet
         ? {
