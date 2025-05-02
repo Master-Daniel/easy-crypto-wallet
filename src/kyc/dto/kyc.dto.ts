@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   IsString,
   IsNotEmpty,
@@ -9,8 +6,9 @@ import {
   IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger'; // Optional for Swagger docs
-import { IdType } from '../enums/id-type.enum'; // Assuming you have an enum for ID types
+import { ApiProperty } from '@nestjs/swagger';
+import { IdType } from '../enums/id-type.enum';
+import { KycStatus } from '../entities/kyc-entity';
 
 export class KycDto {
   @ApiProperty({
@@ -50,8 +48,8 @@ export class KycDto {
     format: 'binary',
     description: 'Image of the ID document',
   })
-  @Type(() => Object) // For proper class-transformer handling
-  id_image: Express.Multer.File; // Assuming you're using Multer for file uploads
+  @Type(() => Object)
+  id_image: Express.Multer.File;
 
   @ApiProperty({
     type: 'string',
@@ -80,5 +78,5 @@ export class KycDto {
 
   @IsBoolean()
   @IsOptional()
-  status?: boolean;
+  status?: KycStatus.PENDING;
 }
