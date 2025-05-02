@@ -22,6 +22,8 @@ import { KycController } from './kyc/kyc.controller';
 import { KycModule } from './kyc/kyc.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { SignalsModule } from './signals/signals.module';
+import { TradedSignalsModule } from './traded-signals/traded-signals.module';
 
 @Module({
   imports: [
@@ -56,6 +58,8 @@ import { join } from 'path';
     DepositRequestModule,
     TransactionModule,
     KycModule,
+    SignalsModule,
+    TradedSignalsModule,
   ],
   controllers: [
     CoinMarketController,
