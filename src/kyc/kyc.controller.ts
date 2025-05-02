@@ -4,6 +4,9 @@ import {
   UseInterceptors,
   UploadedFiles,
   Body,
+  Patch,
+  Param,
+  Get,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { KycDto } from './dto/kyc.dto';
@@ -33,5 +36,18 @@ export class KycController {
     },
   ) {
     return this.kycService.saveKYC(kycDto, files);
+  }
+
+  @Get()
+  findAll() {
+    return this.kycService.findAll();
+  }
+
+  @Patch('update/:id')
+  async updateKYC(
+    @Param('id') id: string,
+    @Body() updateKYCDto: Partial<KycDto>,
+  ) {
+    return this.kycService.patch(id, updateKYCDto);
   }
 }
