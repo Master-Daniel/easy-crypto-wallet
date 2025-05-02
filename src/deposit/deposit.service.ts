@@ -56,9 +56,22 @@ export class DepositRequestService {
       );
     }
 
+    const user = await this.userRepo.findOne(
+      { user_id: depositDto.user_id },
+      { populate: ['kyc_status'] },
+    );
+
+    if (user && user.kyc_status?.status.toLowerCase() == 'pending') {
+      throw new HttpException(
+        { message: 'Please complete your kyc before performing this action' },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const deposit = this.depositRepo.create({
       email: depositDto.email,
       user_id: depositDto.user_id,
+      amount: depositDto.amount,
       subscription_plan: depositDto.subscription_plan,
     });
 
@@ -150,8 +163,12 @@ export class DepositRequestService {
       }
 
       wallet.exchange = wallet.exchange ?? 0;
-      wallet.exchange += tier.amount;
+      wallet.exchange += deposit.amount;
       this.em.persist(wallet);
+      await this.em.flush();
+
+      user.tier = tier;
+      this.em.persist(user);
       await this.em.flush();
     }
 
