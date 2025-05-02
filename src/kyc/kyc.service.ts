@@ -1,9 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 // src/kyc/kyc.service.ts
-import { Injectable, Logger, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MailService } from '../utils/send-mail.util';
-import { EntityManager, EntityRepository } from '@mikro-orm/mysql';
+import { EntityDTO, EntityManager, EntityRepository } from '@mikro-orm/mysql';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { KycDto } from './dto/kyc.dto';
 import { User } from '../user/entities/user.entity';
@@ -24,7 +31,6 @@ export class KycService {
   ) {}
 
   async saveKYC(
-    // userId: string,
     kycDto: KycDto,
     files: {
       id_image?: Express.Multer.File[];
@@ -94,6 +100,50 @@ export class KycService {
     } catch (error) {
       this.logger.error(`KYC submission failed: ${error.message}`, error.stack);
       throw new BadRequestException('Failed to process KYC submission');
+    }
+  }
+
+  async findAll(): Promise<KYC[]> {
+    try {
+      return await this.kycRepo.findAll();
+    } catch (error) {
+      this.logger.error(
+        `Error fetching all kyc: ${error.message}`,
+        error.stack,
+      );
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+
+  async patch(
+    id: string,
+    updateData: Partial<KycDto>,
+  ): Promise<{ message: string; status: number; data: KYC }> {
+    try {
+      const kyc = await this.kycRepo.findOne({ id });
+      if (!kyc) {
+        throw new HttpException('KYC not found', HttpStatus.NOT_FOUND);
+      }
+
+      const safeUpdate: Partial<EntityDTO<KYC>> = {
+        status: updateData.status,
+      };
+
+      this.kycRepo.assign(kyc, safeUpdate);
+      this.em.persist(kyc);
+      await this.em.flush();
+
+      return {
+        message: 'KYC updated successfully',
+        status: HttpStatus.OK,
+        data: kyc,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Error updating KYC ${id}: ${error.message}`,
+        error.stack,
+      );
+      throw new InternalServerErrorException('Failed to update KYC');
     }
   }
 }
