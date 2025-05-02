@@ -21,6 +21,9 @@ export class Transaction {
   @Property()
   destination: string;
 
+  @Property({ nullable: true })
+  description?: string;
+
   @Property({ onCreate: () => new Date() })
   createdAt?: Date;
 
