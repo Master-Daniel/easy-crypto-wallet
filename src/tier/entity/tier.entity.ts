@@ -9,8 +9,17 @@ export class Tier {
   @Property()
   type: string;
 
+  @Property({ nullable: true })
+  name?: string;
+
   @Property()
-  amount: number;
+  max: number;
+
+  @Property()
+  min: number;
+
+  @Property()
+  return: number;
 
   @Property({ onCreate: () => new Date() })
   createdAt?: Date;
