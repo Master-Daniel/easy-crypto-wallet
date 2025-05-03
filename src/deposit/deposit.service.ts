@@ -56,10 +56,10 @@ export class DepositRequestService {
       );
     }
 
-    const user = await this.userRepo.findOne(
-      { user_id: depositDto.user_id },
-      { populate: ['kyc_status'] },
-    );
+    // const user = await this.userRepo.findOne(
+    //   { user_id: depositDto.user_id },
+    //   { populate: ['kyc_status'] },
+    // );
 
     // if (user && user.kyc_status?.status.toLowerCase() == 'pending') {
     //   throw new HttpException(
