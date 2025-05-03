@@ -79,11 +79,11 @@ export class TradedSignalsService {
       throw new NotFoundException('User not found');
     }
 
-    if (user && user.kyc_status?.status.toLowerCase() == 'pending') {
-      throw new BadRequestException(
-        'Please complete your kyc before performing this action',
-      );
-    }
+    // if (user && user.kyc_status?.status.toLowerCase() == 'pending') {
+    //   throw new BadRequestException(
+    //     'Please complete your kyc before performing this action',
+    //   );
+    // }
 
     const signal = await this.signalRepo.findOne({
       id: tradedSignalDto.signal,

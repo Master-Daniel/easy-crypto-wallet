@@ -61,12 +61,12 @@ export class DepositRequestService {
       { populate: ['kyc_status'] },
     );
 
-    if (user && user.kyc_status?.status.toLowerCase() == 'pending') {
-      throw new HttpException(
-        { message: 'Please complete your kyc before performing this action' },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    // if (user && user.kyc_status?.status.toLowerCase() == 'pending') {
+    //   throw new HttpException(
+    //     { message: 'Please complete your kyc before performing this action' },
+    //     HttpStatus.BAD_REQUEST,
+    //   );
+    // }
 
     const deposit = this.depositRepo.create({
       email: depositDto.email,
