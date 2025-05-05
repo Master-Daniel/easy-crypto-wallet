@@ -52,6 +52,8 @@ export class WalletService {
 
     if (wallet[source] < amount) {
       throw new BadRequestException('Insufficient funds in source wallet');
+    } else if (amount <= 0) {
+      throw new BadRequestException('Amount cannot be zero (0)');
     }
 
     wallet[source] -= amount;
