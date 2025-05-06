@@ -307,7 +307,7 @@ export class UserService {
     };
   }
 
-  async findAll(): Promise<User[]> {
+  async fetchAllUsers(): Promise<User[]> {
     try {
       return await this.userRepo.findAll({ populate: ['wallet'] });
     } catch (error) {
@@ -320,24 +320,16 @@ export class UserService {
   }
 
   async findOne(id: string): Promise<User> {
-    try {
-      const user = await this.userRepo.findOne(id, { populate: ['wallet'] });
+    const user = await this.userRepo.findOne(id, { populate: ['wallet'] });
 
-      if (!user) {
-        throw new HttpException(
-          { message: 'User not found' },
-          HttpStatus.NOT_FOUND,
-        );
-      }
-
-      return user;
-    } catch (error) {
-      this.logger.error(
-        `Error finding user by ID: ${error.message}`,
-        error.stack,
+    if (!user) {
+      throw new HttpException(
+        { message: 'User not found 2' },
+        HttpStatus.NOT_FOUND,
       );
-      throw new InternalServerErrorException(error.message);
     }
+
+    return user;
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
