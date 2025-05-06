@@ -7,6 +7,7 @@ import {
   Patch,
   Delete,
   ValidationPipe,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -74,13 +75,13 @@ export class UserController {
     return await this.userService.resetPassword(resetPasswordDto);
   }
 
-  @Get()
+  @Get('all')
   findAll() {
-    return this.userService.findAll();
+    return this.userService.fetchAllUsers();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.userService.findOne(id);
   }
 
