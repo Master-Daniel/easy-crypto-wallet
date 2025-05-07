@@ -1,4 +1,5 @@
 import {
+  forwardRef,
   MiddlewareConsumer,
   Module,
   NestModule,
@@ -14,15 +15,20 @@ import { UserModule } from '../user/user.module';
 import { SignalsModule } from '../signals/signals.module';
 import { SignalUtils } from '../utils/signal';
 import { AuthMiddleware } from '../middleware/auth.middleware';
+import { UserService } from '../user/user.service';
+import { WalletModule } from '../wallet/wallet.module';
+import { MailService } from 'src/utils/send-mail.util';
 
 @Module({
   imports: [
     MikroOrmModule.forFeature([TradedSignal, User, Signals]),
     UserModule,
-    SignalsModule,
+    forwardRef(() => SignalsModule),
+    forwardRef(() => WalletModule),
   ],
   controllers: [TradedSignalsController],
-  providers: [TradedSignalsService, SignalUtils],
+  providers: [TradedSignalsService, SignalUtils, UserService, MailService],
+  exports: [TradedSignalsService],
 })
 export class TradedSignalsModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
