@@ -19,6 +19,9 @@ import { AdminService } from '../admin/admin.service';
 import { Admin } from '../admin/entities/admin.entity';
 import { Wallet } from '../wallet/entities/wallet.entity';
 import { User } from '../user/entities/user.entity';
+import { NotificationService } from '../notification/notification.service';
+import { NotificationModule } from '../notification/notification.module';
+import { Notification } from '../notification/entites/notification.entity';
 
 @Module({
   imports: [
@@ -29,11 +32,19 @@ import { User } from '../user/entities/user.entity';
       Admin,
       Wallet,
       User,
+      Notification,
     ]),
     UserModule,
+    NotificationModule,
   ],
   controllers: [DepositRequestController],
-  providers: [DepositRequestService, MailService, TierService, AdminService],
+  providers: [
+    DepositRequestService,
+    MailService,
+    TierService,
+    AdminService,
+    NotificationService,
+  ],
   exports: [DepositRequestService],
 })
 export class DepositRequestModule implements NestModule {
