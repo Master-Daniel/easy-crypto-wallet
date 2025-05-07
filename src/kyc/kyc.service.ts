@@ -8,7 +8,6 @@ import {
   HttpStatus,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { MailService } from '../utils/send-mail.util';
 import { EntityDTO, EntityManager, EntityRepository } from '@mikro-orm/mysql';
 import { InjectRepository } from '@mikro-orm/nestjs';
@@ -16,6 +15,7 @@ import { KycDto } from './dto/kyc.dto';
 import { User } from '../user/entities/user.entity';
 import { FileUploadService } from './upload-file.service';
 import { KYC, KycStatus } from './entities/kyc-entity';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class KycService {
@@ -24,7 +24,7 @@ export class KycService {
   constructor(
     @InjectRepository(KYC) private readonly kycRepo: EntityRepository<KYC>,
     @InjectRepository(User) private readonly userRepo: EntityRepository<User>,
-    private readonly configService: ConfigService,
+    private readonly notificationService: NotificationService,
     private readonly mailService: MailService,
     private readonly fileUploadService: FileUploadService,
     private readonly em: EntityManager,
@@ -93,6 +93,12 @@ export class KycService {
         );
       }
 
+      await this.notificationService.create({
+        userId: user.id,
+        title: 'Kyc Submission',
+        message: 'Kyc Submitted successfully',
+      });
+
       return {
         message: 'KYC submitted successfully',
         status: 201,
@@ -132,6 +138,12 @@ export class KycService {
       this.kycRepo.assign(kyc, safeUpdate);
       this.em.persist(kyc);
       await this.em.flush();
+
+      await this.notificationService.create({
+        userId: kyc.user?.id || '',
+        title: 'Kyc Status',
+        message: `Kyc ${updateData.status ? 'Approved' : 'Declined'}`,
+      });
 
       return {
         message: 'KYC updated successfully',
