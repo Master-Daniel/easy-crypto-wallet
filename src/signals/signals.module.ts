@@ -1,4 +1,5 @@
 import {
+  forwardRef,
   MiddlewareConsumer,
   Module,
   NestModule,
@@ -12,10 +13,17 @@ import { TierModule } from '../tier/tier.module';
 import { Tier } from '../tier/entity/tier.entity';
 import { SignalUtils } from '../utils/signal';
 import { AuthMiddleware } from '../middleware/auth.middleware';
-import { UserModule } from 'src/user/user.module';
+import { UserModule } from '../user/user.module';
+import { TradedSignal } from '../traded-signals/entities/traded-signals.entity';
+import { TradedSignalsModule } from '../traded-signals/traded-signals.module';
 
 @Module({
-  imports: [MikroOrmModule.forFeature([Signals, Tier]), TierModule, UserModule],
+  imports: [
+    MikroOrmModule.forFeature([Signals, Tier, TradedSignal]),
+    TierModule,
+    UserModule,
+    forwardRef(() => TradedSignalsModule),
+  ],
   controllers: [SignalsController],
   providers: [SignalsService, SignalUtils],
   exports: [SignalsService],
