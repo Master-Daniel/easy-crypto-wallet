@@ -10,6 +10,7 @@ import { EntityManager, EntityRepository } from '@mikro-orm/mysql';
 import { Transaction } from '../transaction/entity/transaction.entity';
 import { User } from 'src/user/entities/user.entity';
 import { v4 as uuid } from 'uuid';
+import { NotificationService } from 'src/notification/notification.service';
 
 type WalletType = 'exchange' | 'trade';
 
@@ -25,6 +26,7 @@ export class WalletService {
     @InjectRepository(User)
     private readonly userRepo: EntityRepository<User>,
 
+    private readonly notificationService: NotificationService,
     private readonly em: EntityManager,
   ) {}
 
@@ -67,6 +69,12 @@ export class WalletService {
       amount,
       source,
       destination,
+    });
+
+    await this.notificationService.create({
+      userId: user.id,
+      title: 'Transfer',
+      message: `Your transfer of ${amount} from ${source} to ${destination} was successful`,
     });
 
     this.em.persist(transaction);
