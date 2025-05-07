@@ -24,6 +24,8 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { SignalsModule } from './signals/signals.module';
 import { TradedSignalsModule } from './traded-signals/traded-signals.module';
+import { NotificationModule } from './notification/notification.module';
+import { WithdrawModule } from './withdraw/withdraw.module';
 
 @Module({
   imports: [
@@ -60,6 +62,8 @@ import { TradedSignalsModule } from './traded-signals/traded-signals.module';
     KycModule,
     SignalsModule,
     TradedSignalsModule,
+    NotificationModule,
+    WithdrawModule,
   ],
   controllers: [
     CoinMarketController,
