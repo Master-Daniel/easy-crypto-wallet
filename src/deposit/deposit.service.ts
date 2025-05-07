@@ -15,8 +15,8 @@ import { DepositRequestDto } from './dto/deposit.dto';
 import { AdminSettings } from '../admin/entities/admin-settings.entity';
 import { Tier } from '../tier/entity/tier.entity';
 import { UpdateDepositStatusDto } from './dto/deposit-update.dto';
-import { Wallet } from '../wallet/entities/wallet.entity';
 import { User } from '../user/entities/user.entity';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class DepositRequestService {
@@ -26,18 +26,13 @@ export class DepositRequestService {
     @InjectRepository(DepositRequest)
     private readonly depositRepo: EntityRepository<DepositRequest>,
 
-    @InjectRepository(AdminSettings)
-    private readonly adminSettingsRepo: EntityRepository<AdminSettings>,
-
     @InjectRepository(Tier)
     private readonly tierRepo: EntityRepository<Tier>,
-
-    @InjectRepository(Wallet)
-    private readonly walletRepo: EntityRepository<Wallet>,
 
     @InjectRepository(User)
     private readonly userRepo: EntityRepository<User>,
 
+    private readonly notificationService: NotificationService,
     private readonly mailService: MailService,
     private readonly em: EntityManager,
   ) {}
@@ -104,6 +99,14 @@ export class DepositRequestService {
       'New Deposit Request',
     );
 
+    const user = await this.userRepo.findOne({ user_id: deposit.user_id });
+
+    await this.notificationService.create({
+      userId: user!.id,
+      title: 'Deposit Request',
+      message: 'Deposit request submitted successfully',
+    });
+
     return {
       message: 'Deposit request submitted successfully',
       status: 201,
@@ -141,9 +144,12 @@ export class DepositRequestService {
     const { status } = updateDto;
 
     if (status) {
-      const user = (await this.userRepo.findOne({
-        user_id: deposit.user_id,
-      })) as User;
+      const user = (await this.userRepo.findOne(
+        {
+          user_id: deposit.user_id,
+        },
+        { populate: ['wallet'] },
+      )) as User;
 
       if (!user) {
         throw new NotFoundException('User not found');
@@ -162,14 +168,16 @@ export class DepositRequestService {
         throw new NotFoundException('Tier not found');
       }
 
-      wallet.exchange = wallet.exchange ?? 0;
-      wallet.exchange += deposit.amount;
-      this.em.persist(wallet);
+      wallet.exchange = (wallet.exchange || 0) + deposit.amount;
+      user.tier = tier;
+      this.em.persist([wallet, user]);
       await this.em.flush();
 
-      user.tier = tier;
-      this.em.persist(user);
-      await this.em.flush();
+      await this.notificationService.create({
+        userId: user.id,
+        title: 'Deposit Request',
+        message: `Your deposit of ${deposit.amount} has been ${status ? 'approved' : 'declined'}`,
+      });
     }
 
     deposit.status = status;
