@@ -324,7 +324,7 @@ export class UserService {
 
     if (!user) {
       throw new HttpException(
-        { message: 'User not found 2' },
+        { message: 'User not found' },
         HttpStatus.NOT_FOUND,
       );
     }
