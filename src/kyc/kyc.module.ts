@@ -17,11 +17,24 @@ import { UserModule } from '../user/user.module';
 import { AdminAuthMiddleware } from '../middleware/admin-auth';
 import { Admin } from '../admin/entities/admin.entity';
 import { AdminService } from '../admin/admin.service';
+import { Notification } from '../notification/entites/notification.entity';
+import { NotificationService } from '../notification/notification.service';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
-  imports: [MikroOrmModule.forFeature([KYC, User, Admin]), UserModule],
+  imports: [
+    MikroOrmModule.forFeature([KYC, User, Admin, Notification]),
+    UserModule,
+    NotificationModule,
+  ],
   controllers: [KycController],
-  providers: [KycService, FileUploadService, MailService, AdminService],
+  providers: [
+    KycService,
+    FileUploadService,
+    MailService,
+    AdminService,
+    NotificationService,
+  ],
   exports: [KycService],
 })
 export class KycModule implements NestModule {
