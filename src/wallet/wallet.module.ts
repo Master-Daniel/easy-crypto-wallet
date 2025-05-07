@@ -1,4 +1,5 @@
 import {
+  forwardRef,
   MiddlewareConsumer,
   Module,
   NestModule,
@@ -12,11 +13,17 @@ import { Transaction } from '../transaction/entity/transaction.entity';
 import { User } from '../user/entities/user.entity';
 import { AuthMiddleware } from '../middleware/auth.middleware';
 import { UserModule } from '../user/user.module';
+import { Notification } from '../notification/entites/notification.entity';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Module({
-  imports: [MikroOrmModule.forFeature([Wallet, Transaction, User]), UserModule],
+  imports: [
+    MikroOrmModule.forFeature([Wallet, Transaction, User, Notification]),
+    forwardRef(() => UserModule),
+  ],
   controllers: [WalletController],
-  providers: [WalletService],
+  providers: [WalletService, NotificationService],
+  exports: [WalletService, MikroOrmModule],
 })
 export class WalletModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
