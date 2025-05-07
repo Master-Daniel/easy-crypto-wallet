@@ -4,13 +4,15 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
-import { Signals } from './entities/signal.entity';
+import { Signals, SignalStatus } from './entities/signal.entity';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager, EntityRepository } from '@mikro-orm/mysql';
 import { SignalDto } from './dto/signals.dto';
 import { Tier } from '../tier/entity/tier.entity';
 import { SignalUtils } from '../utils/signal';
+import { TradedSignal } from 'src/traded-signals/entities/traded-signals.entity';
 
 @Injectable()
 export class SignalsService {
@@ -22,6 +24,9 @@ export class SignalsService {
 
     @InjectRepository(Tier)
     private readonly tierRepo: EntityRepository<Tier>,
+
+    @InjectRepository(TradedSignal)
+    private readonly tradedSignals: EntityRepository<TradedSignal>,
     private readonly em: EntityManager,
     private readonly signalUtils: SignalUtils,
   ) {}
@@ -38,7 +43,10 @@ export class SignalsService {
         status: HttpStatus.CREATED,
       };
     } catch (error) {
-      this.logger.error(`KYC submission failed: ${error.message}`, error.stack);
+      this.logger.error(
+        `Signal creation failed: ${error.message}`,
+        error.stack,
+      );
       throw new InternalServerErrorException('Failed to create signal');
     }
   }
@@ -84,5 +92,47 @@ export class SignalsService {
       count: filteredSignals.length,
       success: true,
     };
+  }
+
+  async updateStatus(
+    id: string,
+    newStatus: SignalStatus,
+  ): Promise<{ message: string; status: number; data?: Signals }> {
+    try {
+      const signal = await this.signalsRepo.findOne(id);
+
+      if (!signal) {
+        throw new NotFoundException(`Signal with ID ${id} not found`);
+      }
+
+      // Validate the new status if needed
+      // Example: if you have specific status values
+      // const validStatuses = ['active', 'inactive', 'pending'];
+      // if (!validStatuses.includes(newStatus)) {
+      //   throw new BadRequestException('Invalid status value');
+      // }
+
+      signal.status = newStatus;
+
+      this.em.persist(signal);
+      await this.em.flush();
+
+      return {
+        message: 'Signal status updated successfully',
+        status: HttpStatus.OK,
+        data: signal,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to update signal status: ${error.message}`,
+        error.stack,
+      );
+
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException('Failed to update signal status');
+    }
   }
 }
