@@ -1,4 +1,5 @@
 import {
+  forwardRef,
   MiddlewareConsumer,
   Module,
   NestModule,
@@ -12,11 +13,13 @@ import { AuthMiddleware } from '../middleware/auth.middleware';
 import { UserModule } from '../user/user.module';
 
 @Module({
-  imports: [MikroOrmModule.forFeature([Transaction]), UserModule],
+  imports: [
+    MikroOrmModule.forFeature([Transaction]),
+    forwardRef(() => UserModule),
+  ],
   controllers: [TransactionController],
   providers: [TransactionService],
   exports: [TransactionService],
-  // Exporting TransactionService to make it available for other modules
 })
 export class TransactionModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
