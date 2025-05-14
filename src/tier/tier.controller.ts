@@ -23,7 +23,7 @@ export class TierController {
     return this.tierService.create(tierDto);
   }
 
-  @Get()
+  @Get('/fetch-all')
   findAll(): Promise<{
     message: string;
     status: number;
