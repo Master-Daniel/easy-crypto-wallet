@@ -14,7 +14,7 @@ export class SignalsController {
     return this.signalService.create(signalDto);
   }
 
-  @Get()
+  @Get('/fetch-all')
   findAll(): Promise<{
     message: string;
     status: number;
