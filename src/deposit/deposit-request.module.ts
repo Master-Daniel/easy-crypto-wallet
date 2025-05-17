@@ -22,6 +22,7 @@ import { User } from '../user/entities/user.entity';
 import { NotificationService } from '../notification/notification.service';
 import { NotificationModule } from '../notification/notification.module';
 import { Notification } from '../notification/entites/notification.entity';
+import { AdminSettingsService } from 'src/admin/admin-settings.service';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { Notification } from '../notification/entites/notification.entity';
     MailService,
     TierService,
     AdminService,
+    AdminSettingsService,
     NotificationService,
   ],
   exports: [DepositRequestService],
