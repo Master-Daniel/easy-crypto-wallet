@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -101,8 +102,12 @@ export class DepositRequestService {
 
     const user = await this.userRepo.findOne({ user_id: deposit.user_id });
 
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
     await this.notificationService.create({
-      userId: user!.id,
+      userId: user.id,
       title: 'Deposit Request',
       message: 'Deposit request submitted successfully',
     });
@@ -136,6 +141,18 @@ export class DepositRequestService {
     updateDto: UpdateDepositStatusDto,
   ): Promise<{ message: string; status: number }> {
     const deposit = await this.depositRepo.findOne({ id });
+    const forkedEm = this.em.fork();
+
+    const settingsRepo = forkedEm.getRepository(AdminSettings);
+    const settingsKeys = ['bonus_percentage'];
+
+    const settings = await settingsRepo.find({
+      key: { $in: settingsKeys },
+    });
+
+    const settingsMap = new Map(settings.map((s) => [s.key, s.value]));
+
+    const bonus = settingsMap.get('bonus_percentage');
 
     if (!deposit) {
       throw new NotFoundException('Deposit request not found');
@@ -168,7 +185,34 @@ export class DepositRequestService {
         throw new NotFoundException('Tier not found');
       }
 
-      wallet.exchange = (wallet.exchange || 0) + deposit.amount;
+      const creditBonus = (deposit.amount / 100) * Number(bonus);
+      const creditAmount = deposit.amount - creditBonus;
+
+      if (user.referralId) {
+        const referredBy = await this.userRepo.findOne({
+          referralId: user.referralId,
+        });
+
+        if (referredBy) {
+          const refree_wallet = referredBy.wallet;
+          if (refree_wallet) {
+            refree_wallet.exchange =
+              (refree_wallet.exchange || 0) + creditBonus;
+            this.em.persist([refree_wallet]);
+            await this.em.flush();
+
+            await this.notificationService.create({
+              userId: referredBy.id,
+              title: 'Bonus Credit',
+              message: `A bonus of ${creditBonus} has credited into your exchange wallet`,
+            });
+          }
+        }
+      } else {
+        console.log('referral id not found');
+      }
+
+      wallet.exchange = (wallet.exchange || 0) + creditAmount;
       user.tier = tier;
       this.em.persist([wallet, user]);
       await this.em.flush();
