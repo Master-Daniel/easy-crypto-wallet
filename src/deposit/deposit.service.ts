@@ -194,11 +194,11 @@ export class DepositRequestService {
         });
 
         if (referredBy) {
-          const refree_wallet = referredBy.wallet;
-          if (refree_wallet) {
-            refree_wallet.exchange =
-              (refree_wallet.exchange || 0) + creditBonus;
-            this.em.persist([refree_wallet]);
+          const referee_wallet = referredBy.wallet;
+          if (referee_wallet) {
+            referee_wallet.exchange =
+              (referee_wallet.exchange || 0) + creditBonus;
+            this.em.persist([referee_wallet]);
             await this.em.flush();
 
             await this.notificationService.create({
