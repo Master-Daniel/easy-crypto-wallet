@@ -54,8 +54,11 @@ export class User {
   })
   tier?: Tier;
 
-  @Property({ nullable: true })
-  referralId?: string;
+  @OneToMany(() => User, (user) => user.referrer)
+  referrals = new Collection<User>(this);
+
+  @ManyToOne(() => User, { nullable: true })
+  referrer?: User;
 
   @OneToOne(() => Wallet, (wallet) => wallet.user, {
     owner: true,
@@ -85,7 +88,12 @@ export class User {
       user_id: this.user_id,
       fullname: this.fullname,
       email_verified: this.email_verified,
-      kyc_status: this.kyc_status,
+      kyc_status: this.kyc_status
+        ? {
+            id: this.kyc_status?.id,
+            status: this.kyc_status?.status,
+          }
+        : null,
       phone: this.phone,
       provider: this.provider,
       providerId: this.providerId,
@@ -95,7 +103,16 @@ export class User {
             type: this.tier.type,
           }
         : null,
-      referralId: this.referralId,
+      referrer: this.referrer
+        ? { id: this.referrer.id, email: this.referrer.email }
+        : null,
+      referrals: this.referrals.isInitialized()
+        ? this.referrals.getItems().map((ref) => ({
+            id: ref.id,
+            email: ref.email,
+          }))
+        : [],
+
       wallet: this.wallet
         ? {
             exchange: this.wallet.exchange,
