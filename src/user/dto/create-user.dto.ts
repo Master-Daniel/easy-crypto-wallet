@@ -29,7 +29,7 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsString()
-  referralId: string;
+  referrer: string;
 
   @IsOptional()
   @IsString()
