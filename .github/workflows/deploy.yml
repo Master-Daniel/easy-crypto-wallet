@@ -100,9 +100,8 @@ jobs:
         run: |
             ssh -i "$SSH_PRIVATE_KEY_PATH" -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.SERVER_IP }} << 'EOF'
               echo "Restarting or starting PM2 process on the server..."
-              cd /home/${{ secrets.USER }}/easy-crypto-wallet || exit 1
-              pm2 restart easy-crypto-wallet-backend || \
-              pm2 start dist/main.js --name "easy-crypto-wallet-backend" --watch
+              pm2 restart apex-crypto-wallet || \
+              pm2 start dist/main.js --name "apex-crypto-wallet" --watch
               echo "Deployment complete."
             EOF
 
