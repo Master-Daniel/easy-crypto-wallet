@@ -58,32 +58,30 @@ jobs:
           chmod 600 ssh_key
           echo "SSH_PRIVATE_KEY_PATH=$(pwd)/ssh_key" >> $GITHUB_ENV
 
-      - name: Prepare remote directory
+      - name: Prepare remote directory (ensure /var/www/easy-crypto-wallet exists)
         run: |
           ssh -i "$SSH_PRIVATE_KEY_PATH" -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.SERVER_IP }} <<EOF
-          sudo mkdir -p /home/${{ secrets.USER }}/easy-crypto-wallet
-          sudo chmod 755 /home/${{ secrets.USER }}/easy-crypto-wallet
-          sudo chown master-daniel:master-daniel /home/${{ secrets.USER }}/easy-crypto-wallet
+          sudo mkdir -p /var/www/easy-crypto-wallet
+          sudo chown -R ${{ secrets.USER }}:${{ secrets.USER }} /var/www/easy-crypto-wallet
           EOF
 
-      - name: Deploy to VPS
+      - name: Deploy to VPS (sync to /var/www/easy-crypto-wallet)
         run: |
           sudo apt-get update && sudo apt-get install -y rsync
-
-          echo ${{ secrets.USER }}@${{ secrets.SERVER_IP }}
-          rsync -avz --progress -e "ssh -i $SSH_PRIVATE_KEY_PATH -o StrictHostKeyChecking=no" dist.tar.gz ${{ secrets.USER }}@${{ secrets.SERVER_IP }}:/home/${{ secrets.USER }}/easy-crypto-wallet/
+          rsync -avz --progress -e "ssh -i $SSH_PRIVATE_KEY_PATH -o StrictHostKeyChecking=no" \
+            dist.tar.gz ${{ secrets.USER }}@${{ secrets.SERVER_IP }}:/var/www/easy-crypto-wallet/
 
           ssh -i "$SSH_PRIVATE_KEY_PATH" -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.SERVER_IP }} <<EOF
-          cd /home/${{ secrets.USER }}/easy-crypto-wallet || exit 1
+          cd /var/www/easy-crypto-wallet || exit 1
 
-          TIMESTAMP=$(date +%Y%m%d%H%M%S)
-          BACKUP_DIR="backup_$TIMESTAMP"
+          TIMESTAMP=\$(date +%Y%m%d%H%M%S)
+          BACKUP_DIR="backup_\$TIMESTAMP"
 
           echo "Creating backup of current deployment..."
           mkdir -p backups
           if [ -d dist ]; then
-            mv dist "backups/$BACKUP_DIR"
-            echo "Backup created at backups/$BACKUP_DIR"
+            mv dist "backups/\$BACKUP_DIR"
+            echo "Backup created at backups/\$BACKUP_DIR"
           else
             echo "No previous build found to backup."
           fi
@@ -103,8 +101,8 @@ jobs:
             ssh -i "$SSH_PRIVATE_KEY_PATH" -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.SERVER_IP }} << 'EOF'
               echo "Restarting or starting PM2 process on the server..."
               cd /home/${{ secrets.USER }}/easy-crypto-wallet || exit 1
-              /usr/local/apps/nodejs22/bin/pm2 restart easy-crypto-wallet-backend || \
-              /usr/local/apps/nodejs22/bin/pm2 start dist/main.js --name "easy-crypto-wallet-backend" --watch
+              pm2 restart easy-crypto-wallet-backend || \
+              pm2 start dist/main.js --name "easy-crypto-wallet-backend" --watch
               echo "Deployment complete."
             EOF
 
