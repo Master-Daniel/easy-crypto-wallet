@@ -188,9 +188,9 @@ export class DepositRequestService {
       const creditBonus = (deposit.amount / 100) * Number(bonus);
       const creditAmount = deposit.amount - creditBonus;
 
-      if (user.referralId) {
+      if (user.referrer) {
         const referredBy = await this.userRepo.findOne({
-          referralId: user.referralId,
+          referrer: user.referrer,
         });
 
         if (referredBy) {
