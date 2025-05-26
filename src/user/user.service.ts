@@ -42,7 +42,7 @@ export class UserService {
     status: number;
     data: ReturnType<User['toJSON']>;
   }> {
-    const { email, phone, provider, providerId, password, referralId } =
+    const { email, phone, provider, providerId, password, referrer } =
       createUserDto;
 
     if (!password && (!provider || !providerId)) {
@@ -55,12 +55,14 @@ export class UserService {
       );
     }
 
-    if (referralId) {
-      const referralExists = await this.userRepo.findOne({
-        user_id: referralId,
+    let referrerUser: User | null = null;
+
+    if (referrer) {
+      referrerUser = await this.userRepo.findOne({
+        user_id: referrer,
       });
 
-      if (!referralExists) {
+      if (!referrerUser) {
         throw new HttpException(
           { message: 'Invalid referral ID', status: HttpStatus.BAD_REQUEST },
           HttpStatus.BAD_REQUEST,
@@ -99,7 +101,10 @@ export class UserService {
     createUserDto.user_id = await generateRandomString(this.userRepo);
 
     // Step 1: Create the user
-    const user = this.userRepo.create(createUserDto);
+    const user = this.userRepo.create({
+      ...createUserDto,
+      referrer: referrerUser,
+    });
     this.em.persist(user);
     await this.em.flush(); // Save user first to generate ID
 
@@ -143,7 +148,7 @@ export class UserService {
 
     const user = await this.userRepo.findOne(
       { email },
-      { populate: ['wallet', 'kyc_status'] },
+      { populate: ['wallet', 'kyc_status', 'referrals'] },
     );
 
     if (!user) {
