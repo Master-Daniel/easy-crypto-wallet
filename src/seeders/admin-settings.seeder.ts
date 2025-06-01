@@ -12,6 +12,7 @@ export class AdminSettingsSeeder extends Seeder {
       { key: 'coin_trade_list', value: 'bitcoin,ethereum' },
       { key: 'elite_coin_key', value: 'abc123' },
       { key: 'bonus_percentage', value: '1' },
+      { key: 'referral_bonus', value: '30' },
       { key: 'admin_email', value: 'fxtfxt25@gmail.com' },
       { key: 'admin_alt_email', value: 'vitctorbitten@gmail.com' },
       { key: 'elite_coin_domain', value: 'http://localhost:2000' },
