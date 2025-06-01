@@ -13,6 +13,9 @@ export class Wallet {
   @Property({ default: 0.0 })
   trade: number = 0;
 
+  @Property({ default: 0.0 })
+  bonus: number = 0;
+
   @OneToOne(() => User, (user) => user.wallet, { unique: true })
   user!: User;
 
@@ -26,6 +29,7 @@ export class Wallet {
     return {
       id: this.id,
       exchange: this.exchange,
+      bonus: this.bonus,
       trade: this.trade,
       user: this.user?.toJSON(),
       createdAt: this.createdAt,
