@@ -144,15 +144,14 @@ export class DepositRequestService {
     const forkedEm = this.em.fork();
 
     const settingsRepo = forkedEm.getRepository(AdminSettings);
-    const settingsKeys = ['bonus_percentage'];
+    const settingsKeys = ['bonus_percentage', 'referral_bonus'];
 
     const settings = await settingsRepo.find({
       key: { $in: settingsKeys },
     });
 
     const settingsMap = new Map(settings.map((s) => [s.key, s.value]));
-
-    const bonus = settingsMap.get('bonus_percentage');
+    const referralBonus = settingsMap.get('referral_bonus');
 
     if (!deposit) {
       throw new NotFoundException('Deposit request not found');
@@ -185,9 +184,6 @@ export class DepositRequestService {
         throw new NotFoundException('Tier not found');
       }
 
-      const creditBonus = (deposit.amount / 100) * Number(bonus);
-      const creditAmount = deposit.amount - creditBonus;
-
       if (user.referrer) {
         const referredBy = await this.userRepo.findOne({
           referrer: user.referrer,
@@ -196,23 +192,27 @@ export class DepositRequestService {
         if (referredBy) {
           const referee_wallet = referredBy.wallet;
           if (referee_wallet) {
-            referee_wallet.exchange =
-              (referee_wallet.exchange || 0) + creditBonus;
-            this.em.persist([referee_wallet]);
-            await this.em.flush();
+            try {
+              referee_wallet.bonus =
+                (referee_wallet.bonus || 0) + Number(referralBonus);
+              this.em.persist([referee_wallet]);
+              await this.em.flush();
 
-            await this.notificationService.create({
-              userId: referredBy.id,
-              title: 'Bonus Credit',
-              message: `A bonus of ${creditBonus} has credited into your exchange wallet`,
-            });
+              await this.notificationService.create({
+                userId: referredBy.id,
+                title: 'Bonus Credit',
+                message: `A bonus of ${referralBonus} has credited into your exchange wallet`,
+              });
+            } catch (error) {
+              console.log('Bonus credit error:', error);
+            }
           }
         }
       } else {
         console.log('referral id not found');
       }
 
-      wallet.exchange = (wallet.exchange || 0) + creditAmount;
+      wallet.exchange = (wallet.exchange || 0) + deposit.amount;
       user.tier = tier;
       this.em.persist([wallet, user]);
       await this.em.flush();
