@@ -46,7 +46,7 @@ export class KycService {
 
     // Check for existing KYC
     const existingKYC = await this.kycRepo.findOne({ user: kycDto.user_id });
-    if (existingKYC) {
+    if (existingKYC && existingKYC.status === KycStatus.PENDING) {
       throw new BadRequestException('KYC already submitted');
     }
 
@@ -142,7 +142,7 @@ export class KycService {
       await this.notificationService.create({
         userId: kyc.user?.id || '',
         title: 'Kyc Status',
-        message: `Kyc ${updateData.status ? 'Approved' : 'Declined'}`,
+        message: `Kyc ${(updateData.status as KycStatus) === KycStatus.APPROVED ? 'Approved' : 'Declined'}`,
       });
 
       return {
