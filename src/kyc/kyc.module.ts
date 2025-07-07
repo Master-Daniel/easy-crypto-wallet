@@ -1,4 +1,3 @@
-// ../kyc/kyc.module.ts
 import {
   MiddlewareConsumer,
   Module,
@@ -46,8 +45,8 @@ export class KycModule implements NestModule {
     consumer
       .apply(AdminAuthMiddleware)
       .forRoutes(
-        { path: '/', method: RequestMethod.GET },
-        { path: 'kyc/update/:id', method: RequestMethod.PATCH },
+        { path: 'kyc/admin/list', method: RequestMethod.GET },
+        { path: 'kyc/admin/update/:id', method: RequestMethod.PATCH },
       );
   }
 }
