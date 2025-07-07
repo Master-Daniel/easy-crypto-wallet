@@ -38,12 +38,12 @@ export class KycController {
     return this.kycService.saveKYC(kycDto, files);
   }
 
-  @Get()
+  @Get('/admin/list')
   findAll() {
     return this.kycService.findAll();
   }
 
-  @Patch('update/:id')
+  @Patch('/admin/update/:id')
   async updateKYC(
     @Param('id') id: string,
     @Body() updateKYCDto: Partial<KycDto>,
