@@ -56,7 +56,7 @@ export class MailService {
       });
 
       const mailOptions: nodemailer.SendMailOptions = {
-        from: `"Easy Crypto Wallet" <${this.configService.get<string>('MAIL_USER')}>`,
+        from: `"Apex AI Wallet" <${this.configService.get<string>('MAIL_USER')}>`,
         to,
         subject,
         html: htmlContent,
