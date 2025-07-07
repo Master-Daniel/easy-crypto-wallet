@@ -103,9 +103,7 @@ export class User {
             type: this.tier.type,
           }
         : null,
-      referrer: this.referrer
-        ? { id: this.referrer.id, email: this.referrer.email }
-        : null,
+      referrer: this.referrer?.id ?? null,
       referrals: this.referrals.isInitialized()
         ? this.referrals.getItems().map((ref) => ({
             id: ref.id,
@@ -117,6 +115,7 @@ export class User {
         ? {
             exchange: this.wallet.exchange,
             trade: this.wallet.trade,
+            bonus: this.wallet.bonus,
           }
         : null,
       createdAt: this.createdAt,
