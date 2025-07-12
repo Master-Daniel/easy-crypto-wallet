@@ -314,7 +314,7 @@ export class UserService {
 
   async fetchAllUsers(): Promise<User[]> {
     try {
-      return await this.userRepo.findAll({ populate: ['wallet'] });
+      return await this.userRepo.findAll({ populate: ['wallet', 'referrals'] });
     } catch (error) {
       this.logger.error(
         `Error fetching all users: ${error.message}`,
