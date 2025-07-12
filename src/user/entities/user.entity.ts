@@ -107,6 +107,7 @@ export class User {
       referrals: this.referrals.isInitialized()
         ? this.referrals.getItems().map((ref) => ({
             id: ref.id,
+            name: ref.fullname,
             email: ref.email,
           }))
         : [],

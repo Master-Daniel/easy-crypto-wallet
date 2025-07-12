@@ -48,6 +48,7 @@
     "@nestjs/swagger": "^11.1.0",
     "@nestjs/throttler": "^6.4.0",
     "@nestjs/websockets": "^11.0.16",
+    "axios": "1.14.0",
     "bcrypt": "^5.1.1",
     "cache-manager": "^6.4.2",
     "class-transformer": "^0.5.1",
